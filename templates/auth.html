@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+  <section class="auth card">
+    <h1>{{'Create account' if mode=='register' else 'Welcome back'}}</h1>
+    <p class="muted">Organize your health records in one place.</p>
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+      {% if mode=='register' %}
+        <label>
+          Username
+          <input type="text" name="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_.\-]{3,30}" autocomplete="username" autocapitalize="none" spellcheck="false" value="{{form_username or ''}}" title="3-30 characters: letters, numbers, dots, hyphens, or underscores">
+        </label>
+        <label>
+          Email
+          <input type="email" name="email" required autocomplete="email" maxlength="255" value="{{form_email or ''}}">
+        </label>
+      {% else %}
+        <label>
+          Email or username
+          <input type="text" name="identifier" required autocomplete="username" autocapitalize="none" spellcheck="false" maxlength="255">
+        </label>
+      {% endif %}
+      <label>
+        Password
+        <input type="password" name="password" required minlength="{{12 if mode=='register' else 1}}" autocomplete="{{'new-password' if mode=='register' else 'current-password'}}">
+      </label>
+      <button class="primary full">{{'Create account' if mode=='register' else 'Log in'}}</button>
+    </form>
+    <p class="muted">
+      {% if mode=='register' %}
+        Already registered?
+        <a href="{{url_for('login')}}">Log in</a>
+      {% else %}
+        New here?
+        <a href="{{url_for('register')}}">Create an account</a>
+      {% endif %}
+    </p>
+  </section>
+{% endblock %}

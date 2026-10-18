@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+  {% set k = form.get('kind', '') %}
+  {% set apv = form.get('ampm', '') %}
+  {% set val = form.get('value', '') %}
+  <div class="hero">
+    <div>
+      <p class="eyebrow">HEALTH JOURNAL</p>
+      <h1>{{'Edit record' if entry else 'Add a record'}}</h1>
+    </div>
+    <a class="button ghost" href="{{url_for('index')}}">Back</a>
+  </div>
+  <section class="card form-card">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+      <label>
+        Record type
+        <select name="kind" id="kind" required>
+          <option value="" disabled hidden {% if not k %}selected{% endif %}>Select a record type</option>
+          {% for key,item in kinds.items() %}
+            <option value="{{key}}" {% if k==key %}selected{% endif %}>{{item[0]}}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <div class="row-2">
+        <label>
+          Date (PST)
+          <span class="picker">
+            <input type="text" name="date" id="date" required placeholder="MM/DD/YYYY" inputmode="numeric" autocomplete="off" maxlength="10" pattern="(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/[0-9]{4}" title="Format: MM/DD/YYYY" value="{{ form.get('date', '') }}">
+            <button type="button" class="icon-btn" id="date-btn" aria-label="Choose date from calendar">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18"/></svg>
+            </button>
+            <input type="date" id="date-native" class="native" tabindex="-1" aria-hidden="true">
+          </span>
+        </label>
+        <label>
+          Time (PST)
+          <span class="time-row">
+            <span class="picker">
+              <input type="text" name="time" id="time" required placeholder="HH:MM" inputmode="numeric" autocomplete="off" maxlength="5" pattern="(0[1-9]|1[0-2]):[0-5][0-9]" title="Format: HH:MM" value="{{ form.get('time', '') }}">
+              <button type="button" class="icon-btn" id="time-btn" aria-label="Choose time from clock">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+              </button>
+              <input type="time" id="time-native" class="native" tabindex="-1" aria-hidden="true">
+            </span>
+            <select name="ampm" id="ampm" required aria-label="AM or PM">
+              <option value="" disabled hidden {% if not apv %}selected{% endif %}>AM/PM</option>
+              <option value="AM" {% if apv=='AM' %}selected{% endif %}>AM</option>
+              <option value="PM" {% if apv=='PM' %}selected{% endif %}>PM</option>
+            </select>
+          </span>
+        </label>
+      </div>
+      <label>
+        Title
+        <input name="title" id="title" maxlength="120" required placeholder="e.g. Breakfast, Morning walk, Glucose reading" value="{{ form.get('title', '') }}">
+      </label>
+      <label>
+        Value
+        <span class="muted" id="unit"></span>
+        <input name="value" id="value" type="number" step="any" min="0" max="100000" value="{{ val }}">
+      </label>
+      <label>
+        Notes
+        <textarea name="notes" maxlength="500" rows="4" placeholder="Optional details">{{ form.get('notes', entry.notes if entry else '') }}</textarea>
+      </label>
+      <button class="primary" id="save">{{'Save changes' if entry else 'Add record'}}</button>
+    </form>
+  </section>
+  <script>(function(){const KD={{ kinds|tojson }};const $=id=>document.getElementById(id);
+const sel=$('kind'),val=$('value'),unit=$('unit'),dt=$('date'),tm=$('time'),ap=$('ampm'),ti=$('title'),save=$('save');
+const pad=n=>String(n).padStart(2,'0');
+const dateOk=v=>/^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/[0-9]{4}$/.test(v);
+const timeOk=v=>/^(0[1-9]|1[0-2]):[0-5][0-9]$/.test(v);
+const fmtD=(d,g)=>{let o=d.slice(0,2);if(d.length>2||(d.length===2&&g))o+='/'+d.slice(2,4);if(d.length>4||(d.length===4&&g))o+='/'+d.slice(4,8);return o};
+const fmtT=(d,g)=>{let o=d.slice(0,2);if(d.length>2||(d.length===2&&g))o+=':'+d.slice(2,4);return o};
+function check(){const k=sel.value;save.disabled=!(k&&dateOk(dt.value)&&timeOk(tm.value)&&ap.value&&ti.value.trim()&&(k==='medication'||(val.value.trim()!==''&&val.validity.valid)))}
+function upd(){const k=sel.value,u=(KD[k]||['',''])[1];
+ if(k==='medication'){unit.textContent='(not needed for medication)';val.disabled=true;val.required=false;val.value='';val.placeholder='Not needed'}
+ else{unit.textContent=k?'('+u+')':'';val.disabled=false;val.required=true;val.placeholder=k?'Value in '+u:'Value'}check()}
+function onlyDigits(el,max,fmt){el.addEventListener('input',e=>{const grow=!e.inputType||e.inputType.indexOf('insert')===0;el.value=fmt(el.value.replace(/\D/g,'').slice(0,max),grow);check()})}
+onlyDigits(dt,8,fmtD);onlyDigits(tm,4,fmtT);
+function bind(nid,bid,onPick,getNative){const n=$(nid);
+ n.addEventListener('change',()=>{if(n.value){onPick(n.value);check()}});
+ $(bid).addEventListener('click',()=>{n.value=getNative()||'';try{n.showPicker()}catch(e){n.focus();n.click()}})}
+bind('date-native','date-btn',v=>{const m=v.split('-');dt.value=m[1]+'/'+m[2]+'/'+m[0]},()=>{const m=dt.value.match(/^(\d\d)\/(\d\d)\/(\d{4})$/);return dateOk(dt.value)?m[3]+'-'+m[1]+'-'+m[2]:''});
+bind('time-native','time-btn',v=>{const p=v.split(':'),h=+p[0];tm.value=pad(h%12||12)+':'+p[1];ap.value=h>=12?'PM':'AM'},()=>timeOk(tm.value)&&ap.value?pad(+tm.value.slice(0,2)%12+(ap.value==='PM'?12:0))+':'+tm.value.slice(3):'');
+[sel,ap,ti,val].forEach(x=>{x.addEventListener('input',check);x.addEventListener('change',check)});
+sel.addEventListener('change',upd);upd();})();</script>
+{% endblock %}

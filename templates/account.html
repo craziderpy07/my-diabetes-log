@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="hero">
+    <div>
+      <p class="eyebrow">ACCOUNT</p>
+      <h1>Personal Information</h1>
+    </div>
+    <a class="button ghost" href="{{url_for('index')}}">Back</a>
+  </div>
+
+  <!-- Section 1: username and email -->
+  <section class="card form-card">
+    <div class="card-head">
+      <h2>Personal details</h2>
+      <div class="head-buttons">
+        <!-- form="info-form" lets this button sit in the corner but still submit the form below -->
+        <button class="primary" id="edit-btn" form="info-form">Edit</button>
+        <button type="button" class="danger" id="info-cancel" hidden>Cancel</button>
+      </div>
+    </div>
+    <div id="info-msg" role="alert" hidden></div>
+    <form id="info-form" method="post" action="{{url_for('update_account')}}">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+      <label>
+        Username
+        <input type="text" name="username" id="username" required minlength="3" maxlength="30" pattern="[A-Za-z0-9_.\-]{3,30}" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Not set" value="{{ current_user.username or '' }}" title="3-30 characters: letters, numbers, dots, hyphens, or underscores" disabled>
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" id="email" required maxlength="255" autocomplete="email" value="{{ current_user.email }}" disabled>
+      </label>
+      <div id="info-confirm" hidden>
+        <label>
+          Current password <span class="muted">(required to save changes)</span>
+          <input type="password" name="current_password" required autocomplete="current-password" disabled>
+        </label>
+      </div>
+    </form>
+  </section>
+
+  <!-- Section 2: change password -->
+  <section class="card form-card">
+    <div class="card-head">
+      <h2>Password</h2>
+      <div class="head-buttons">
+        <!-- form="pw-form" lets this button sit in the corner but still submit the form below -->
+        <button class="primary" id="pw-btn" form="pw-form">Update Password</button>
+        <button type="button" class="danger" id="pw-cancel" hidden>Cancel</button>
+      </div>
+    </div>
+    <div id="pw-msg" role="alert" hidden></div>
+    <p class="muted">Change the password you use to log in.</p>
+    <form id="pw-form" method="post" action="{{url_for('change_password')}}">
+      <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+      <label>
+        Current password
+        <input type="password" name="current_password" required autocomplete="current-password" disabled>
+      </label>
+      <label>
+        New password <span class="muted">(at least 12 characters)</span>
+        <input type="password" name="new_password" required minlength="12" autocomplete="new-password" disabled>
+      </label>
+      <label>
+        Confirm new password
+        <input type="password" name="confirm_password" required minlength="12" autocomplete="new-password" disabled>
+      </label>
+    </form>
+  </section>
+
+  <script>
+    (function () {
+      // Send a form to the server without reloading the page
+      function send(form, box, onSuccess) {
+        fetch(form.action, {
+          method: 'POST',
+          body: new FormData(form),
+          credentials: 'same-origin'
+        })
+          .then(function (response) {
+            return response.json().then(function (data) {
+              return { ok: response.ok, data: data };
+            });
+          })
+          .then(function (result) {
+            showMessage(box, result.data.message, result.ok);
+            if (result.ok) { onSuccess(result.data); }
+          })
+          .catch(function () {
+            showMessage(box, 'Something went wrong. Refresh the page and try again.', false);
+          });
+      }
+
+      var $ = function (id) { return document.getElementById(id); };
+      var infoBox = $('info-msg'), pwBox = $('pw-msg');
+      var infoForm = $('info-form'), pwForm = $('pw-form');
+      var username = $('username'), email = $('email');
+      // Remember the saved values so Cancel can put them back
+      var saved = { username: username.value, email: email.value };
+
+      function showMessage(box, text, ok) {
+        box.textContent = text;
+        box.className = 'alert ' + (ok ? 'success' : 'error');
+        box.hidden = false;
+      }
+
+      // Turn the "Personal details" fields on or off
+      var infoEditing = false;
+      function setEditing(on) {
+        infoEditing = on;
+        username.disabled = !on;
+        email.disabled = !on;
+        infoForm.current_password.disabled = !on;
+        $('info-confirm').hidden = !on;
+        $('edit-btn').textContent = on ? 'Save Changes' : 'Edit';
+        $('info-cancel').hidden = !on;
+      }
+
+      // Turn the password boxes on or off (and switch the button label)
+      var pwEditing = false;
+      function setChangingPassword(on) {
+        pwEditing = on;
+        ['current_password', 'new_password', 'confirm_password'].forEach(function (name) {
+          pwForm[name].disabled = !on;
+        });
+        $('pw-btn').textContent = on ? 'Save Changes' : 'Update Password';
+        $('pw-cancel').hidden = !on;
+      }
+
+      $('info-cancel').addEventListener('click', function () {
+        username.value = saved.username;
+        email.value = saved.email;
+        infoForm.current_password.value = '';
+        infoBox.hidden = true;
+        setEditing(false);
+      });
+
+      infoForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        // First click on "Edit" unlocks the boxes. The next click ("Save Changes") sends them.
+        if (!infoEditing) {
+          infoBox.hidden = true;
+          setEditing(true);
+          username.focus();
+          return;
+        }
+        send(infoForm, infoBox, function (data) {
+          saved = { username: data.username, email: data.email };
+          username.value = data.username;
+          email.value = data.email;
+          infoForm.current_password.value = '';
+          setEditing(false);
+          // Update the name shown in the nav bar
+          var navName = document.querySelector('.nav-right .email');
+          if (navName) { navName.textContent = data.username || data.email; }
+        });
+      });
+
+      $('pw-cancel').addEventListener('click', function () {
+        pwForm.reset();
+        pwBox.hidden = true;
+        setChangingPassword(false);
+      });
+      
+      pwForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        // First click on "Update Password" unlocks the boxes. The next click ("Save Changes") sends them.
+        if (!pwEditing) {
+          pwBox.hidden = true;
+          setChangingPassword(true);
+          pwForm.current_password.focus();
+          return;
+        }
+        if (pwForm.new_password.value !== pwForm.confirm_password.value) {
+          showMessage(pwBox, 'New password and confirmation do not match.', false);
+          return;
+        }
+        send(pwForm, pwBox, function () {
+          pwForm.reset();
+          setChangingPassword(false);
+        });
+      });
+    })();
+  </script>
+{% endblock %}

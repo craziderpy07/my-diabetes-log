@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% block content %}
+  <div class="hero">
+    <div>
+      <p class="eyebrow">YOUR HEALTH JOURNAL</p>
+      <h1>My Diabetes Log</h1>
+      <p class="muted">Review glucose, meals, exercise, and medications in one timeline.</p>
+    </div>
+    <a class="primary button" href="{{url_for('new_entry')}}">+ Add record</a>
+  </div>
+  <div class="stats">
+    <article class="card stat">
+      <span class="muted">Records shown</span>
+      <strong>{{count}}</strong>
+    </article>
+    <article class="card stat">
+      <span class="muted">Average glucose shown</span>
+      <strong>
+        {% if average is not none %}
+          {{average}}
+          <small>mg/dL</small>
+        {% else %}
+          —
+        {% endif %}
+      </strong>
+    </article>
+    <article class="card stat">
+      <span class="muted">Glucose readings shown</span>
+      <strong>{{rolling|length}}</strong>
+    </article>
+  </div>
+  <section class="card">
+    <h2>Find records</h2>
+    <form class="filters" method="get">
+      <div class="stack">
+        <label>
+          From
+          <input type="date" name="start" value="{{start}}">
+        </label>
+        <label>
+          To
+          <input type="date" name="end" value="{{end}}">
+        </label>
+      </div>
+      <div class="filter-right">
+        <label class="kind">
+          Record type
+          <select name="kind">
+            <option value="">All records</option>
+            {% for key,item in kinds.items() %}
+              <option value="{{key}}" {% if selected_kind==key %}selected{% endif %}>{{item[0]}}</option>
+            {% endfor %}
+          </select>
+        </label>
+        <div class="btn-stack">
+          <button class="primary">Filter</button>
+          <a class="button ghost" href="{{url_for('index')}}">Clear</a>
+        </div>
+      </div>
+    </form>
+  </section>
+  <section class="card timeline" id="timeline">
+    <h2>Timeline</h2>
+    {% if not events %}
+      <div class="empty">No records found. Add your first record to get started.</div>
+    {% endif %}
+    {% for e in events %}
+      <article class="event">
+        <div class="event-icon {{e.kind}}">{{{'glucose':'◉','meal':'◈','exercise':'↗','medication':'✚'}[e.kind]}}</div>
+        <div class="event-body">
+          <div class="event-heading">
+            <span class="tag">{{kinds[e.kind][0]}}</span>
+            <time>{{e.timestamp|pst}}</time>
+          </div>
+          <!-- Left side: title and measurement. Right side: optional notes. -->
+          <div class="event-details">
+            <div class="event-main">
+              <h3>{{e.title}}</h3>
+              {% if e.value is not none %}
+                <p class="measure">{{'%g'|format(e.value)}} {{kinds[e.kind][1]}}</p>
+              {% endif %}
+            </div>
+            {% if e.notes %}
+              <p class="muted event-notes">{{e.notes}}</p>
+            {% endif %}
+          </div>
+        </div>
+        <div class="actions">
+          <a class="btn btn-edit" href="{{url_for('edit_entry',entry_id=e.id)}}">Edit</a>
+          <form method="post" action="{{url_for('delete_entry',entry_id=e.id)}}" onsubmit="return confirm('Delete this record?')">
+            <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+            <button class="btn btn-delete">Delete</button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+    {% if pages>1 %}
+      <nav class="pager" aria-label="Timeline pages">
+        {% if page>1 %}
+          <a class="button ghost" href="{{url_for('index',page=page-1,start=start or None,end=end or None,kind=selected_kind or None)}}">Previous</a>
+        {% else %}
+          <span class="button ghost disabled">Previous</span>
+        {% endif %}
+        <span class="muted">Page {{page}} of {{pages}}</span>
+        {% if page<pages %}
+          <a class="button ghost" href="{{url_for('index',page=page+1,start=start or None,end=end or None,kind=selected_kind or None)}}">Next</a>
+        {% else %}
+          <span class="button ghost disabled">Next</span>
+        {% endif %}
+      </nav>
+    {% endif %}
+  </section>
+  <script>(function(){const sec=document.getElementById('timeline');if(!sec||!window.fetch)return;
+sec.addEventListener('click',e=>{const a=e.target.closest('.pager a');if(!a)return;e.preventDefault();const y=window.scrollY;
+fetch(a.href,{credentials:'same-origin'}).then(r=>{if(!r.ok)throw 0;return r.text()}).then(html=>{const n=new DOMParser().parseFromString(html,'text/html').getElementById('timeline');if(!n)throw 0;sec.innerHTML=n.innerHTML;history.pushState(null,'',a.href);window.scrollTo(0,y)}).catch(()=>{location.href=a.href})});
+window.addEventListener('popstate',()=>location.reload())})();</script>
+{% endblock %}

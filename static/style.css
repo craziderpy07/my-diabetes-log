@@ -1,0 +1,604 @@
+/* ===== My Diabetes Log - classic blue/white theme ===== */
+
+/* ---------- Page basics ---------- */
+:root {
+  font-family: Arial, Helvetica, sans-serif;
+  color: #212529;
+  background: #f2f4f7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.container {
+  width: min(1000px, calc(100% - 32px));
+  margin: auto;
+}
+
+main {
+  padding-top: 28px;
+  padding-bottom: 60px;
+}
+
+h1 {
+  font-size: 1.9rem;
+  margin: 4px 0;
+}
+
+h2 {
+  font-size: 1.2rem;
+  margin: 0 0 16px;
+}
+
+h3 {
+  font-size: 1.05rem;
+  margin: 6px 0 2px;
+}
+
+a {
+  color: #0d6efd;
+}
+
+.muted,
+footer,
+time {
+  color: #6c757d;
+}
+
+footer {
+  padding: 20px 0 40px;
+  font-size: .85rem;
+  text-align: center;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- Navigation bar ---------- */
+header {
+  background: #1e3a5f;
+  color: white;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+  gap: 12px;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nav-right form {
+  margin: 0;
+}
+
+.nav-right .email {
+  font-weight: 700;
+  color: white;
+}
+
+/* ---------- Cards and headings ---------- */
+.card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #6c757d;
+}
+
+.card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-head h2 {
+  margin: 0;
+}
+
+.head-buttons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ---------- Summary boxes ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 0;
+  padding: 16px;
+}
+
+.stat strong {
+  font-size: 1.8rem;
+}
+
+.stat small {
+  font-size: .9rem;
+  font-weight: 400;
+  color: #6c757d;
+}
+
+/* ---------- Forms ---------- */
+label {
+  display: block;
+  margin-bottom: 14px;
+  font-weight: 700;
+}
+
+input,
+select,
+textarea {
+  display: block;
+  width: 100%;
+  margin-top: 4px;
+  padding: 8px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  background: white;
+  color: #212529;
+  font: inherit;
+  font-weight: 400;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, .25);
+}
+
+input:disabled {
+  background: #e9ecef;
+  color: #495057;
+  -webkit-text-fill-color: #495057;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+select:required:invalid {
+  color: #6c757d;
+}
+
+option {
+  color: #212529;
+}
+
+.auth {
+  max-width: 420px;
+  margin: 40px auto;
+}
+
+.form-card {
+  max-width: 680px;
+}
+
+.row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.time-row {
+  display: flex;
+  gap: 8px;
+}
+
+.time-row .picker {
+  flex: 1;
+  min-width: 0;
+}
+
+.time-row select {
+  width: 96px;
+  flex: none;
+}
+
+/* Date / time boxes with a calendar or clock icon inside */
+.picker {
+  position: relative;
+  display: block;
+}
+
+.picker input[type=text] {
+  padding-right: 46px;
+}
+
+.icon-btn {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: #495057;
+}
+
+.icon-btn:hover {
+  background: #e9ecef;
+}
+
+.picker .native {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- Alerts ---------- */
+.alert {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #b6d4fe;
+  border-radius: 4px;
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.alert.success {
+  background: #d1e7dd;
+  border-color: #badbcc;
+  color: #0f5132;
+}
+
+.alert.error {
+  background: #f8d7da;
+  border-color: #f5c2c7;
+  color: #842029;
+}
+
+/* ---------- Buttons ---------- */
+button,
+.button,
+.primary {
+  font: inherit;
+  cursor: pointer;
+}
+
+.primary,
+.ghost,
+.danger {
+  display: inline-block;
+  padding: 8px 16px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color .15s, border-color .15s, color .15s, box-shadow .15s;
+}
+
+.button {
+  display: inline-block;
+}
+
+.full {
+  width: 100%;
+}
+
+/* green = main action */
+.primary {
+  background: #198754;
+  border-color: #198754;
+  color: white;
+}
+
+.primary:hover {
+  background: #157347;
+  border-color: #146c43;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+
+.primary:disabled,
+.primary:disabled:hover {
+  background: #198754;
+  box-shadow: none;
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+/* white with grey outline = secondary action */
+.ghost {
+  background: white;
+  border-color: #adb5bd;
+  color: #343a40;
+}
+
+.ghost:hover {
+  background: #e9ecef;
+  border-color: #6c757d;
+}
+
+/* red = Cancel / Delete */
+.danger,
+.btn-delete {
+  background: #dc3545;
+  border-color: #dc3545;
+  color: white;
+}
+
+.danger:hover,
+.btn-delete:hover {
+  background: #bb2d3b;
+  border-color: #b02a37;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+
+/* small Edit / Delete buttons in the timeline */
+.btn {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: white;
+  font: inherit;
+  font-size: .9rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color .15s, border-color .15s, box-shadow .15s;
+}
+
+.btn-edit {
+  background: #198754;
+  border-color: #198754;
+}
+
+.btn-edit:hover {
+  background: #157347;
+  border-color: #146c43;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+}
+
+/* buttons in the dark nav bar */
+.nav-right .ghost {
+  background: transparent;
+  border-color: rgba(255, 255, 255, .7);
+  color: white;
+}
+
+.nav-right .ghost:hover {
+  background: rgba(255, 255, 255, .18);
+  border-color: white;
+}
+
+/* ---------- Filters ---------- */
+.filters {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filters .stack {
+  flex: 0 0 170px;
+  min-width: 0;
+}
+
+.filter-right {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filters label.kind {
+  flex: 0 0 170px;
+  min-width: 0;
+}
+
+.btn-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.btn-stack .button,
+.btn-stack button {
+  width: 100%;
+  min-width: 110px;
+}
+
+/* ---------- Timeline ---------- */
+.event {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid #e9ecef;
+}
+
+.event-icon {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #cfe2ff;
+  color: #084298;
+  font-weight: 700;
+}
+
+.event-icon.meal {
+  background: #fff3cd;
+  color: #664d03;
+}
+
+.event-icon.exercise {
+  background: #d1e7dd;
+  color: #0f5132;
+}
+
+.event-icon.medication {
+  background: #e2d9f3;
+  color: #432874;
+}
+
+.event-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.event-heading time {
+  font-size: .8rem;
+}
+
+.tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #e9ecef;
+  color: #495057;
+  font-size: .75rem;
+  font-weight: 700;
+}
+
+.event-details {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.event-main,
+.event-notes {
+  flex: 1;
+  min-width: 0;
+}
+
+.event-notes {
+  margin: 4px 0;
+  overflow-wrap: anywhere;
+}
+
+.measure {
+  margin: 2px 0;
+  font-weight: 700;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.actions form {
+  margin: 0;
+}
+
+.empty {
+  padding: 24px;
+  text-align: center;
+  color: #6c757d;
+}
+
+.pager {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
+}
+
+.pager .disabled,
+.pager button:disabled {
+  opacity: .45;
+  pointer-events: none;
+}
+
+/* ---------- Small screens ---------- */
+@media (max-width: 650px) {
+  .row-2,
+  .stats {
+    grid-template-columns: 1fr;
+  }
+  .hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .event {
+    gap: 10px;
+  }
+  .event-details {
+    flex-direction: column;
+    gap: 0;
+  }
+  .actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-right .email {
+    display: none;
+  }
+  .card {
+    padding: 16px;
+  }
+}

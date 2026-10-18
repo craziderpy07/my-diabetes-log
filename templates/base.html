@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>My Diabetes Log</title>
+    <link rel="stylesheet" href="/style.css">
+  </head>
+  <body>
+    <header>
+      <div class="container nav">
+        <a class="brand" href="{{url_for('index')}}">♥ My Diabetes Log</a>
+        {% if current_user.is_authenticated %}
+          <div class="nav-right">
+            <span class="email">{{current_user.username or current_user.email}}</span>
+            <a class="button ghost" href="{{url_for('account')}}">My Account</a>
+            <form method="post" action="{{url_for('logout')}}">
+              <input type="hidden" name="csrf_token" value="{{csrf_token()}}">
+              <button class="ghost">Log out</button>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </header>
+    <main class="container">
+      {% with messages=get_flashed_messages(with_categories=true) %}
+      {% for category,message in messages %}
+        <div class="alert {{category}}" role="alert">{{message}}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}
+    {% endblock %}
+  </main>
+  <footer class="container">Educational project • Not for treatment decisions or emergency monitoring • Use fictional data for demonstrations.</footer>
+</body>
+</html>
